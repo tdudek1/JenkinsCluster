@@ -1,0 +1,11 @@
+---
+- hosts: jenkinsagent
+  become: true
+  
+  vars:
+    java_packages:
+      - java-11-openjdk
+
+  roles:
+    - role: geerlingguy.java
+  
