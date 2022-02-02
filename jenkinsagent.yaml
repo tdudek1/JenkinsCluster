@@ -1,11 +1,51 @@
 ---
-- hosts: jenkinsagent
+- hosts: jenkinsagent*
   become: true
   
   vars:
     java_packages:
       - java-11-openjdk
-
+    jeknins_url: http://jenkins.home:8080
+    jenkinsagent_workdir: /var/lib/jenkins
+    jenkinsagent_executors_num: 2
+    jenkinsagent_windows_labels: 
   roles:
     - role: geerlingguy.java
-  
+    - role: geerlingguy.docker
+    - role: geerlingguy.git
+  tasks:
+    - name: create agent directory
+      file:
+        path: "{{jenkinsagent_workdir}}"
+        state: directory
+    - name: add agent
+      jenkins_script:
+        url: "{{jeknins_url}}"
+        script: >-
+          {{ lookup('template', 'scripts/createagent.j2') }}
+        user: admin
+        password: admin
+      register: jenkinsagent_secret
+    - name: copy secret
+      copy:
+        content: "{{jenkinsagent_secret.output}}"
+        dest: /var/lib/jenkins/secret
+    - name: get agent jar
+      get_url:
+        url: "{{jeknins_url}}/jnlpJars/agent.jar"
+        dest: /var/lib/jenkins/agent.jar
+        mode: '0440'
+    - name: copy service file
+      copy:
+        content: "{{ lookup('template', 'scripts/jenkinsagent.service') }}"
+        dest: /etc/systemd/system/jenkinsagent.service
+        owner: root
+        group: root
+    - name: reload daemon
+      ansible.builtin.systemd:
+        daemon_reload: yes      
+    - name: start jenkins agent
+      systemd:
+        name: jenkinsagent
+        state: started
+        enabled: yes        

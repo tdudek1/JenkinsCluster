@@ -1,0 +1,12 @@
+import jenkins.model.*
+
+Jenkins.instance.setSlaveAgentPort(5000)
+Jenkins.instance.save()
+
+Jenkins jenkins = Jenkins.getInstance()
+jenkins.setNumExecutors(0)
+jenkins.save()
+
+def jenkinsLocationConfiguration = JenkinsLocationConfiguration.get()
+jenkinsLocationConfiguration.setUrl("http://{{jenkins_hostname}}:8080")
+jenkinsLocationConfiguration.save()
