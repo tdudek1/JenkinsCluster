@@ -5,10 +5,10 @@
   vars:
     java_packages:
       - java-11-openjdk
-    jeknins_url: http://jenkins.home:8080
+    jenkins_url: http://jenkins.home:8080
     jenkinsagent_workdir: /var/lib/jenkins
     jenkinsagent_executors_num: 2
-    jenkinsagent_windows_labels: 
+    jenkinsagent_label: linux
   roles:
     - role: geerlingguy.java
     - role: geerlingguy.docker
@@ -20,7 +20,7 @@
         state: directory
     - name: add agent
       jenkins_script:
-        url: "{{jeknins_url}}"
+        url: "{{jenkins_url}}"
         script: >-
           {{ lookup('template', 'scripts/createagent.j2') }}
         user: admin
@@ -32,7 +32,7 @@
         dest: /var/lib/jenkins/secret
     - name: get agent jar
       get_url:
-        url: "{{jeknins_url}}/jnlpJars/agent.jar"
+        url: "{{jenkins_url}}/jnlpJars/agent.jar"
         dest: /var/lib/jenkins/agent.jar
         mode: '0440'
     - name: copy service file

@@ -3,7 +3,7 @@ Description=jenkinsagent
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/java -jar /var/lib/jenkins/agent.jar -jnlpUrl {{ jeknins_url }}/computer/{{ansible_hostname}}/jenkins-agent.jnlp -secret @/var/lib/jenkins/secret
+ExecStart=/usr/bin/java -jar /var/lib/jenkins/agent.jar -jnlpUrl {{ jenkins_url }}/computer/{{ansible_hostname}}/jenkins-agent.jnlp -secret @/var/lib/jenkins/secret
 User=root
 
 [Install]

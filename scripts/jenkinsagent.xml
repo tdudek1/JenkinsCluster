@@ -1,0 +1,8 @@
+<service>
+  <id>jenkinsagent1</id>
+  <name>Jenkins Agent</name>
+  <description>Jenkins Agent</description>  
+  <executable>java</executable>
+  <arguments>-jar c:\jenkins\agent.jar -jnlpUrl {{ jenkins_url }}/computer/{{ansible_hostname}}/jenkins-agent.jnlp -secret @secret</arguments>
+  <log mode="roll"></log>
+</service>

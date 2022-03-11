@@ -1,0 +1,10 @@
+credentials:
+  system:
+    domainCredentials:
+    - credentials:
+      - usernamePassword:
+          id: "44991fd0-9cfa-49b2-b2e1-3578c3ff74b7"
+          password: "{AQAAABAAAAAQoNGjBHWdwq0yTBbf+TWPJCEOza3gF32E9rvC8XFBiKo=}"
+          scope: GLOBAL
+          username: "test2"
+          

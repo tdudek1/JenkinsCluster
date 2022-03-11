@@ -1,0 +1,104 @@
+---
+- hosts: jenkinsagentwindows*
+
+  vars:
+    jdk_package: openjdk11
+    java_major_version: 11.0.13
+    java_minor_version: 8
+    jenkins_url: http://jenkins.home:8080
+    jenkins_local_url: http://localhost:8080
+    jenkinsagent_workdir: c:/jenkins
+    jenkinsagent_executors_num: 2
+    jenkinsagent_label: windows
+    winsw_url: https://github.com/winsw/winsw/releases/download/v2.11.0/WinSW-x64.exe
+  tasks:
+  - name: install java
+    win_chocolatey:
+      name: "{{ jdk_package }}"
+      state: present
+      version: "{{ java_major_version }}.{{ java_minor_version }}"
+  - name: set javahome
+    win_environment:
+      state: present
+      name: JAVA_HOME
+      value: 'C:\Program Files\OpenJDK\openjdk-{{ java_major_version }}_{{ java_minor_version }}'
+      level: machine
+  - name: add java to path
+    win_path:
+      elements:
+        - 'C:\Program Files\OpenJDK\openjdk-{{ java_major_version }}_{{ java_minor_version }}\bin'
+  - name: create jenkins workign directory
+    win_file:
+      path: '{{jenkinsagent_workdir}}'
+      state: directory
+  - name: add agent
+    delegate_to: localhost
+    jenkins_script:
+      url: "{{jenkins_local_url}}"
+      script: >-
+        {{ lookup('template', 'scripts/createagent.j2') }}
+      user: admin
+      password: admin
+    register: jenkinsagent_secret
+  - name: copy secret
+    win_copy:
+     content: "{{jenkinsagent_secret.output}}"
+     dest: '{{jenkinsagent_workdir}}/secret'
+  - name: copy service xml
+    win_copy:
+      content: >-
+        {{ lookup('template', 'scripts/jenkinsagent.xml') }}
+      dest: '{{jenkinsagent_workdir}}/jenkinsagent.xml'     
+  - name: downlad agent jar
+    win_get_url:
+      url: '{{ jenkins_url }}/jnlpJars/agent.jar'
+      dest: '{{jenkinsagent_workdir}}/agent.jar'
+      force: false
+  - name: downlad agent service wrapper
+    win_get_url:
+      url: '{{ winsw_url }}'
+      dest: '{{jenkinsagent_workdir}}/jenkinsagent.exe'
+      force: false            
+  - name: create jeknins agent service
+    win_service:
+      name: jenkinsagent
+      path: '{{jenkinsagent_workdir}}/jenkinsagent.exe'
+      display_name: jenkinsagent
+      description: Jenkins Agent
+      username: vagrant
+      password: vagrant
+      start_mode: auto
+  - name: add log on as service
+    win_user_right:
+      name: SeServiceLogonRight
+      users:
+      - vagrant
+      action: add      
+  - name: install build tools          
+    win_chocolatey:
+      name: visualstudio2022buildtools
+      state: present
+  - name: install git
+    win_chocolatey:
+      name: git
+      state: present
+  - name: install framework 4.8
+    win_chocolatey:
+        name: netfx-4.8-devpack
+        state: present          
+  - name: add to msbuild to path
+    win_path:
+     elements:
+      - 'C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin'     
+  - name: reboot windows 
+    win_reboot:
+  - name: start jeknins agent service
+    win_service:
+      name: jenkinsagent
+      state: started
+
+
+      
+      
+      
+
