@@ -2,39 +2,55 @@
 - hosts: jenkinsagent*
   become: true
   
+  vars_files:
+  - defaults.yml  
+  
   vars:
     java_packages:
       - java-11-openjdk
-    jenkins_url: http://jenkins.home:8080
     jenkinsagent_workdir: /var/lib/jenkins
     jenkinsagent_executors_num: 2
     jenkinsagent_label: linux
+    jenkins_url: "http://{{jenkins_hostname}}:8080"
+  
   roles:
     - role: geerlingguy.java
     - role: geerlingguy.docker
     - role: geerlingguy.git
+  
   tasks:
+    - name: create agent user
+      user:
+        name: jenkcd ins
+        group: docker
+        home: "{{jenkinsagent_workdir}}"
+        shell: /bin/false
     - name: create agent directory
       file:
         path: "{{jenkinsagent_workdir}}"
         state: directory
+        mode: u=rwx,g=rwx,o=r
     - name: add agent
       jenkins_script:
         url: "{{jenkins_url}}"
         script: >-
           {{ lookup('template', 'scripts/createagent.j2') }}
-        user: admin
-        password: admin
+        user: "{{jenkins_admin_username}}"
+        password: "{{jenkins_admin_password}}"
       register: jenkinsagent_secret
     - name: copy secret
       copy:
         content: "{{jenkinsagent_secret.output}}"
         dest: /var/lib/jenkins/secret
+        owner: jenkins
+        group: docker
     - name: get agent jar
       get_url:
         url: "{{jenkins_url}}/jnlpJars/agent.jar"
         dest: /var/lib/jenkins/agent.jar
         mode: '0440'
+        owner: jenkins
+        group: docker
     - name: copy service file
       copy:
         content: "{{ lookup('template', 'scripts/jenkinsagent.service') }}"

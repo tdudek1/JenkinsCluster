@@ -1,15 +1,20 @@
 ---
 - hosts: jenkinsagentwindows*
 
+  vars_files:
+  - defaults.yml  
+
   vars:
     jdk_package: openjdk11
     java_major_version: 11.0.13
     java_minor_version: 8
-    jenkins_url: http://jenkins.home:8080
+    jenkins_url: "http://{{jenkins_hostname}}:8080"
     jenkins_local_url: http://localhost:8080
     jenkinsagent_workdir: c:/jenkins
     jenkinsagent_executors_num: 2
     jenkinsagent_label: windows
+    jenkinagent_service_user: vagrant
+    jenkinagent_service_password: vagrant
     winsw_url: https://github.com/winsw/winsw/releases/download/v2.11.0/WinSW-x64.exe
   tasks:
   - name: install java
@@ -37,8 +42,9 @@
       url: "{{jenkins_local_url}}"
       script: >-
         {{ lookup('template', 'scripts/createagent.j2') }}
-      user: admin
-      password: admin
+      user: "{{jenkins_admin_username}}"
+      password: "{{jenkins_admin_password}}"
+
     register: jenkinsagent_secret
   - name: copy secret
     win_copy:
@@ -59,25 +65,21 @@
       url: '{{ winsw_url }}'
       dest: '{{jenkinsagent_workdir}}/jenkinsagent.exe'
       force: false            
-  - name: create jeknins agent service
+  - name: create jenkins agent service
     win_service:
       name: jenkinsagent
       path: '{{jenkinsagent_workdir}}/jenkinsagent.exe'
       display_name: jenkinsagent
       description: Jenkins Agent
-      username: vagrant
-      password: vagrant
+      username: "{{jenkinagent_service_user}}"
+      password: "{{jenkinagent_service_password}}"
       start_mode: auto
   - name: add log on as service
     win_user_right:
       name: SeServiceLogonRight
       users:
-      - vagrant
+      - "{{jenkinagent_service_user}}"
       action: add      
-  - name: install build tools          
-    win_chocolatey:
-      name: visualstudio2022buildtools
-      state: present
   - name: install git
     win_chocolatey:
       name: git
@@ -85,7 +87,19 @@
   - name: install framework 4.8
     win_chocolatey:
         name: netfx-4.8-devpack
-        state: present          
+        state: present 
+  - name: install build tools          
+    win_chocolatey:
+      name: visualstudio2022buildtools
+      state: present         
+  - name: install web tools
+    win_chocolatey:
+      name: visualstudio2022-workload-webbuildtools
+      state: present         
+  - name: install nuget        
+    win_chocolatey:
+      name: nuget.commandline
+      state: present        
   - name: add to msbuild to path
     win_path:
      elements:

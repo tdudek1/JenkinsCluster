@@ -16,12 +16,12 @@ Vagrant.configure("2") do |config|
   end
 
  
-  config.vm.define "jenkinsagent" do |jenkinsagent|
-      jenkinsagent.vm.box = "generic/centos8"
-      jenkinsagent.vm.hostname = "jagentlinux.home"   
-      jenkinsagent.vm.network "private_network", ip: "192.168.56.20"
+  config.vm.define "jenkinsagentlinux" do |jenkinsagentlinux|
+    jenkinsagentlinux.vm.box = "generic/centos8"
+    jenkinsagentlinux.vm.hostname = "jagentlinux.home"   
+    jenkinsagentlinux.vm.network "private_network", ip: "192.168.56.20"
 
-      jenkinsagent.vm.provision 'ansible', run: 'always', type: :ansible do |ansible| 
+    jenkinsagentlinux.vm.provision 'ansible', run: 'always', type: :ansible do |ansible| 
         ansible.playbook = "jenkinsagent.yml"
         ansible.become = true
       end
