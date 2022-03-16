@@ -21,7 +21,7 @@
   tasks:
     - name: create agent user
       user:
-        name: jenkcd ins
+        name: jenkins
         group: docker
         home: "{{jenkinsagent_workdir}}"
         shell: /bin/false
