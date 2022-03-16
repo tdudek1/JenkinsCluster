@@ -1,5 +1,5 @@
 ---
-- hosts: jenkinsagent*
+- hosts: jagentlinux.home
   become: true
   
   vars_files:
