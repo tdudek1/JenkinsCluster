@@ -1,0 +1,15 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<com.xebialabs.deployit.ci.DeployitNotifier_-DeployitDescriptor plugin="deployit-plugin@22.0.0">
+  <deployitServerUrl>{{jenkins_xld_url}}</deployitServerUrl>
+  <deployitClientProxyUrl></deployitClientProxyUrl>
+  <connectionPoolSize>10</connectionPoolSize>
+  <credentials>
+    <com.xebialabs.deployit.ci.Credential>
+      <name></name>
+      <username></username>
+      <password></password>
+      <credentialsId>{{jenkins_xld_credential_id}}</credentialsId>
+      <useGlobalCredential>true</useGlobalCredential>
+    </com.xebialabs.deployit.ci.Credential>
+  </credentials>
+</com.xebialabs.deployit.ci.DeployitNotifier_-DeployitDescriptor>

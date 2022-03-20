@@ -185,26 +185,34 @@
         version: "1.28"
       - name: "authentication-tokens"
         version: "1.3"
-        
+    jenkins_xld_url: http://xldeploy1234
+    jenkins_xld_credential_id: bd8069e0-33f5-4da5-99d4-9db135cdc468
   roles:
     - role: geerlingguy.java
     - role: geerlingguy.jenkins
     - role: geerlingguy.git
   tasks:
-    - name: create 
+    - name: create jenkins casc directory
       ansible.builtin.file:
         path: /var/lib/jenkins/casc
         state: directory
-        mode: u+rwx,g-rwx,o-rx
+        mode: u+rwx,g+rwx,o+rx
         owner: jenkins
         group: jenkins  
-    - name: copy service file
+    - name: copy jenkins as code file
       copy:
         content: "{{ lookup('template', 'scripts/jenkins.yml') }}"
         dest: /var/lib/jenkins/casc/jenkins.yml
         owner: jenkins
         group: jenkins
-        mode: u+rwx,g-rwx,o-rx
+        mode: u+rwx,g+rwx,o+rx
+    - name: copy xld config file 
+      copy:
+        content: "{{ lookup('template', 'scripts/xldconfig.xml') }}"
+        dest: /var/lib/jenkins/com.xebialabs.deployit.ci.DeployitNotifier.xml
+        owner: jenkins
+        group: jenkins
+        mode: u+rw,g+r,o+r
     - name: add ports ui
       firewalld:
         port: "{{jenkins_http_port}}/tcp"
@@ -226,4 +234,9 @@
           {{ lookup('template', 'scripts/configjenkins.j2') }}
         user: "{{jenkins_admin_username}}"
         password: "{{jenkins_admin_password}}"
+    - name: restart jenkins
+      systemd:
+        name: jenkins
+        state: restarted   
+
 

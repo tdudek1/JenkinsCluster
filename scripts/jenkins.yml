@@ -3,8 +3,13 @@ credentials:
     domainCredentials:
     - credentials:
       - usernamePassword:
-          id: "44991fd0-9cfa-49b2-b2e1-3578c3ff74b7"
-          password: "{AQAAABAAAAAQoNGjBHWdwq0yTBbf+TWPJCEOza3gF32E9rvC8XFBiKo=}"
+          id: 95872b2e-6a76-4105-a5c6-2a562559c329
+          password: "testqqq"
           scope: GLOBAL
           username: "test2"
+      - usernamePassword:
+          id: bd8069e0-33f5-4da5-99d4-9db135cdc468
+          password: "test23232"
+          scope: GLOBAL
+          username: "test23232"
           
